@@ -5,7 +5,6 @@ import sample_generator as sg
 
 def test_sampler_builds():
     R = np.diag([1., 1.])
-    s = sg.SampleGenerator(rotation_matrix=R)
     s = sg.SampleGenerator(covariance=R)
     return
 
