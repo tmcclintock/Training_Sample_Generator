@@ -1,2 +1,5 @@
 # Training_Sample_Generator
-A tool to create training samples for emulation from MCMC chains or covariance matrices.
+
+Emulators are tools for performing predictions of some quantity that is otherwise difficult to predict accurately. They are useful in situations where one can compute that quantity accurately for a high cost (e.g. running an expensive simulation), but it would be useful to have that quantity evaluated immediately. Under the hood, an emulator interpolates the quantity of interest as a function of some underlying parameters.
+
+In cosmology, emulators are useful for predicting large scale structure observables (power spectra, halo distributions, etc.) as functions of cosmological parameters. Emulators are trained on simulations ran with specific sets of cosmological parameters. The set of those parameters dictate the range of validity of the emulators. This tool is used to create training samples for emulation from MCMC chains or covariance matrices.
