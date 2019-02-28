@@ -12,6 +12,7 @@ class SampleGenerator(object):
                                 "or covariance.")
             self.set_chain(chain)
         else:# covariance is not None
+            self.set_means(np.zeros_like(covariance[0]))
             self.set_covariance(covariance)
         self.set_scale(3)
         return
@@ -29,7 +30,7 @@ class SampleGenerator(object):
         if l1 > l2:
             chain = chain.T
         self.chain = chain
-        self.set_means(np.mean(chain, 0))
+        self.set_means(np.mean(chain, 1))
         self.set_covariance(np.cov(self.chain))
         return
 
@@ -70,6 +71,77 @@ class SampleGenerator(object):
         theta = 2*np.pi*np.random.random(Nsamples)
         r = np.random.random(Nsamples) + np.random.random(Nsamples)
         r[(r>1)] = 2 - r[(r>1)]
-        return np.array([r*np.cos(theta), r*np.sin(theta)])/2.
+        return np.array([r*np.cos(theta), r*np.sin(theta)]).T/2. + 0.5
     
-    
+    def generate_LHMDU_samples(self, Nsamples, oversampling=5,
+                               Nneighbors=2):
+        N = Nsamples*oversampling
+        ndim = len(self.covariance)
+        flat_rands = self.generate_flat_samples(N)
+        #Compute distances beteween all random points
+        distances = np.zeros((N, N))
+        for i in range(0, N):
+            for j in range(i+1, N):
+                distances[i,j] = distances[j,i] = \
+                    np.linalg.norm(flat_rands[i]-flat_rands[j])
+                continue
+            continue
+        
+        #Eliminate points based on those that have minimum distances to other
+        #points, until we are down to Nsamples (the number we want)
+        aveDistances = np.zeros(N)
+        indices = np.arange(N)
+        while(len(aveDistances) > Nsamples):
+            for i, row in enumerate(sorted(indices)):
+                meanAveDist = \
+                    np.mean(sorted(distances[i,sorted(indices)])[:Nneighbors+1])
+                #Note: the +1 is "to remove the zero index"
+                #Append the average distances
+                aveDistances[i] = meanAveDist
+                continue
+            #Delete the row with the minimum mean distance
+            index_to_delete = np.argmin(aveDistances)
+            indices = np.delete(indices, index_to_delete)
+            aveDistances = np.delete(aveDistances, index_to_delete)
+            continue
+        
+        #The output matrix
+        strata_matrix = flat_rands[sorted(indices)]
+        if len(strata_matrix) != Nsamples:
+            raise Exception("Number of samples in the strata matrix is not "+\
+                            "the requested amount.")
+        if len(strata_matrix[0]) != ndim:
+            raise Exception("Dimensions of strata matrix is not the same "+\
+                            "as your covariance.")
+
+        return strata_matrix
+        
+    def get_samples(self, Nsamples, method="flat", **kwargs):
+        if method=="flat":
+            x = self.generate_flat_samples(Nsamples)
+        elif method=="circular":
+            x = self.generate_circular_samples(Nsamples)
+        elif method=="LHMDU":
+            items = kwargs.items()
+            oversampling = 5
+            Nneighbors = 2
+            if bool(items):
+                if "oversampling" in items.keys():
+                    oversampling = items["oversampling"]
+                if "Nneighbors" in items.keys():
+                    Nneighbors = items["Nneighbors"]
+                for key, _ in items:
+                    if key not in ["oversampling", "Nneighbors"]:
+                        print("Keyword %s does nothing."%(key))
+            x = self.generate_LHMDU_samples(Nsamples, oversampling, Nneighbors)
+        else:
+            raise Exception("Invalid sample generation method.")
+        x -= 0.5 #center
+        s = self.scale
+        cov = self.covariance
+        return np.dot(x[:], cov*s)[:] + self.means
+
+if __name__ == "__main__":
+    c = np.diag([1,1])
+    sg = SampleGenerator(covariance=c)
+    x = sg.get_samples(10, "LHMDU")
