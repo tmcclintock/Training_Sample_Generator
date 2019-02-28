@@ -72,12 +72,17 @@ class SampleGenerator(object):
         r = np.random.random(Nsamples) + np.random.random(Nsamples)
         r[(r>1)] = 2 - r[(r>1)]
         return np.array([r*np.cos(theta), r*np.sin(theta)]).T/2. + 0.5
+
+    def generate_grid_samples(self, Nsamples):
+        ndim = len(self.covariance)
+        samples = np.random.randint(0, Nsamples-1, size=(Nsamples, ndim))
+        return samples.astype(float)/Nsamples
     
     def generate_LHMDU_samples(self, Nsamples, oversampling=5,
                                Nneighbors=2):
         N = Nsamples*oversampling
         ndim = len(self.covariance)
-        flat_rands = self.generate_flat_samples(N)
+        flat_rands = self.generate_grid_samples(N)
         #Compute distances beteween all random points
         distances = np.zeros((N, N))
         for i in range(0, N):
