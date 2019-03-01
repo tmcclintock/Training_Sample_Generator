@@ -82,7 +82,7 @@ class SampleGenerator(object):
                                Nneighbors=2):
         N = Nsamples*oversampling
         ndim = len(self.covariance)
-        flat_rands = self.generate_grid_samples(N)
+        flat_rands = self.generate_flat_samples(N)
         #Compute distances beteween all random points
         distances = np.zeros((N, N))
         for i in range(0, N):
