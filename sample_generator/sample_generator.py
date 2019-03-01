@@ -5,7 +5,7 @@ class SampleGenerator(object):
     Generate training samples for emulation
     """
 
-    def __init__(self, chain=None, covariance=None):
+    def __init__(self, chain=None, covariance=None, scale=3):
         if chain is not None:
             if covariance is not None:
                 raise Exception("Must only supply one of a chain "+
@@ -14,7 +14,7 @@ class SampleGenerator(object):
         else:# covariance is not None
             self.set_means(np.zeros_like(covariance[0]))
             self.set_covariance(covariance)
-        self.set_scale(3)
+        self.set_scale(scale)
         return
 
     def set_scale(self, scale):
