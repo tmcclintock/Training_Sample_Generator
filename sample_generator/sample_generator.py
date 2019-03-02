@@ -6,6 +6,7 @@ class SampleGenerator(object):
     """
 
     def __init__(self, chain=None, covariance=None, scale=3):
+        self.set_scale(scale)
         if chain is not None:
             if covariance is not None:
                 raise Exception("Must only supply one of a chain "+
@@ -14,7 +15,6 @@ class SampleGenerator(object):
         else:# covariance is not None
             self.set_means(np.zeros_like(covariance[0]))
             self.set_covariance(covariance)
-        self.set_scale(scale)
         return
 
     def set_scale(self, scale):
@@ -46,12 +46,17 @@ class SampleGenerator(object):
         w, R = np.linalg.eig(self.covariance)
         self.eigenvalues = w
         self.rotation_matrix = R
+        self.transformation_matrix = self.scale*np.dot(R, np.sqrt(w))
         return
 
     def set_covariance_from_decomposition(self, eigenvalues,
                                           rotation_matrix):
         self.eigenvalues = eigenvalues
         self.rotation_matrix = rotation_matrix
+        w = eigenvalues
+        R = rotation_matrix
+        self.transformation_matrix = self*scale*np.dot(np.sqrt(w), R)
+
         cov = np.zeros_like(self.rotation_matrix)
         for i in range(len(self.rotation_matrix)):
             cov += self.eigenvalues[i]*np.outer(self.rotation_matrix[:,i],
@@ -143,10 +148,11 @@ class SampleGenerator(object):
             raise Exception("Invalid sample generation method.")
         x -= 0.5 #center
         s = self.scale
-        cov = self.covariance
-        return np.dot(x[:], cov*s)[:] + self.means
-
+        w = self.eigenvalues
+        R = self.rotation_matrix
+        return np.dot(s*x[:]*np.sqrt(w), R.T)[:] + self.means
+        
 if __name__ == "__main__":
     c = np.diag([1,1])
     sg = SampleGenerator(covariance=c)
-    x = sg.get_samples(10, "LHMDU")
+    x = sg.get_samples(10, "flat")
