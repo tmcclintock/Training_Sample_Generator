@@ -18,6 +18,10 @@ class SampleGenerator(object):
         return
 
     def set_scale(self, scale):
+        if scale <= 0:
+            raise Exception("Scale cannot be <=0.")
+        if scale > 15:
+            raise Exception("Scale value is unrealistically large.")
         self.scale = scale
         return
 
