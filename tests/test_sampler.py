@@ -33,8 +33,21 @@ def test_exceptions():
     return
 
 def test_samples():
-    chain = np.random.randn(2, 1000)
+    Np = 2
+    chain = np.random.randn(Np, 1000)
     s = sg.SampleGenerator(chain=chain)
     N = 100 #N_samples
     samp = s.generate_flat_samples(N)
+    npt.assert_equal(Np, len(samp[0]))
+    npt.assert_equal(N, len(samp))
+    samp = s.generate_circular_samples(N)
+    npt.assert_equal(Np, len(samp[0]))
+    npt.assert_equal(N, len(samp))
+    samp = s.generate_grid_samples(N)
+    npt.assert_equal(Np, len(samp[0]))
+    npt.assert_equal(N, len(samp))
+    return
+
+if __name__ == "__main__":
+    test_samples()
     
