@@ -150,6 +150,7 @@ class SampleGenerator(object):
             x = self.generate_LHMDU_samples(Nsamples, oversampling, Nneighbors)
         else:
             raise Exception("Invalid sample generation method.")
+        self.current_projected_samples = x
         x -= 0.5 #center
         s = self.scale
         w = self.eigenvalues
