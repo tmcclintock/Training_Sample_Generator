@@ -77,7 +77,11 @@ class SampleGenerator(object):
         return np.random.random((Nsamples, ndim))
 
     def generate_circular_samples(self, Nsamples):
-        theta = 2*np.pi*np.random.random(Nsamples)
+        ndim = len(self.covariance)
+        if ndim > 2:
+            raise Exception("circular samples don't work with more than 2 "+\
+                            "parameters yet")
+        theta = 2*np.pi*np.random.random((Nsamples, ndim))
         r = np.random.random(Nsamples) + np.random.random(Nsamples)
         r[(r>1)] = 2 - r[(r>1)]
         return np.array([r*np.cos(theta), r*np.sin(theta)]).T/2. + 0.5
