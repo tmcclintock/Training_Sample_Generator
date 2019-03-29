@@ -70,7 +70,6 @@ class SampleGenerator(object):
 
     def set_seed(self, seed):
         np.random.seed(seed)
-        self.current_seed = s
         return
 
     def generate_flat_samples(self, Nsamples):
@@ -145,6 +144,20 @@ class SampleGenerator(object):
             x = self.generate_flat_samples(Nsamples)
         elif method=="circular":
             x = self.generate_circular_samples(Nsamples)
+        elif method=="LH":
+            items = kwargs.items()
+            criterion = "center"
+            iterations = 5
+            if bool(items):
+                if "criterion" in items.keys():
+                    criterion = items["criterion"]
+                if "iterations" in items.keys():
+                    iterations = items["iterations"]
+                for key, _ in items:
+                    if key not in ["criterion", "iterations"]:
+                        print("Keyword %s does nothing."%(key))
+            x = self.generate_LH_samples(Nsamples, criterion=criterion,
+                                         iterations=iterations)
         elif method=="LHMDU":
             items = kwargs.items()
             oversampling = 5
