@@ -48,6 +48,17 @@ def test_samples():
     npt.assert_equal(N, len(samp))
     return
 
+def test_pyDOE2_functions():
+    #Samples taken using the pyDOE2 package
+    Np = 2
+    chain = np.random.randn(Np, 1000)
+    s = sg.SampleGenerator(chain=chain)
+    N = 100 #N_samples
+    samp = s.generate_LH_samples(N)
+    npt.assert_equal(Np, len(samp[0]))
+    npt.assert_equal(N, len(samp))
+    return
+
 if __name__ == "__main__":
     test_samples()
     

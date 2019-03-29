@@ -70,6 +70,7 @@ class SampleGenerator(object):
 
     def set_seed(self, seed):
         np.random.seed(seed)
+        self.current_seed = s
         return
 
     def generate_flat_samples(self, Nsamples):
@@ -127,8 +128,17 @@ class SampleGenerator(object):
         if len(strata_matrix[0]) != ndim:
             raise Exception("Dimensions of strata matrix is not the same "+\
                             "as your covariance.")
-
         return strata_matrix
+
+    def generate_LH_samples(self, Nsamples, criterion="center",
+                            iterations=5):
+        try:
+            import pyDOE2
+        except ImportError:
+            raise Exception("pyDOE2 must be installed for these samples.")
+        ndim = len(self.covariance)
+        return pyDOE2.lhs(ndim, samples=Nsamples, criterion=criterion,
+                          iterations=iterations)
         
     def get_samples(self, Nsamples, method="flat", **kwargs):
         if method=="flat":
